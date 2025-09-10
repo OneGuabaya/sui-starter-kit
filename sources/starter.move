@@ -109,4 +109,17 @@ module starter::academia_system {
         subject.score = score;
         subject.approved = approved;
     }
+
+     // Eliminar alumno
+    public fun delete_student(
+        student: Student
+    ) {
+        let Student {id,  
+        name: _,
+        email: _,
+        subjects: _
+        } = student;
+
+        id.delete();
+    }
 }
