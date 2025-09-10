@@ -11,7 +11,7 @@ module starter::academia_system {
     }
 
     // Estructura de las notas
-    public struct Grades has store {
+    public struct Grades has store, drop {
         name: String,
         score: u16,
         approved: bool,
@@ -19,6 +19,8 @@ module starter::academia_system {
 
     #[error]
     const REGISTRO_EXISTENTE: vector<u8> = b"El identificador del alumno ya existe.";
+    #[error]
+    const REGISTRO_NO_EXISTE: vector<u8> = b"El identificador del alumno no existe.";
 
     // Calcula promedio de las notas que tiene 
     //public fun calculate_average(student: &Student): u64 {
@@ -41,7 +43,9 @@ module starter::academia_system {
     //}
 
     // Crear estudiantes
-    public fun add_student(ctx: &mut TxContext) {
+    public fun add_student(
+        ctx: &mut TxContext
+        ) {
         let estudiante = Student {
             id: object::new(ctx),
             name: utf8(b"Jesus Viloria"),
@@ -74,5 +78,35 @@ module starter::academia_system {
         };
 
         student.subjects.insert(id, materia)
+    }
+
+     // Eliminar materia
+    public fun delete_subjects(
+        student: &mut Student, 
+        id: u64,
+    ) {
+        assert!(student.subjects.contains(&id), REGISTRO_NO_EXISTE);
+        student.subjects.remove(&id);
+    }
+
+    //Actualiza las notas
+    public fun sync_score(
+        student: &mut Student, 
+        id: u64,
+        score: u16
+        
+    ) {
+        assert!(student.subjects.contains(&id), REGISTRO_NO_EXISTE);
+
+        let subject = student.subjects.get_mut(&id);
+
+        let approved = if (score > 5) {
+            true
+        } else {
+            false
+        };
+
+        subject.score = score;
+        subject.approved = approved;
     }
 }
